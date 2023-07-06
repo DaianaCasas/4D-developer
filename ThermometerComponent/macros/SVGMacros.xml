@@ -1,0 +1,13 @@
+<macros>
+
+<macro name="Termometro_Create" version="2">
+<text>
+<method>
+  Termometro_Create("<method_name/>");
+</method>
+</text>
+</macro>
+
+
+</macros>
+
