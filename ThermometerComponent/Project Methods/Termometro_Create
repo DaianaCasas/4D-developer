@@ -1,0 +1,71 @@
+
+  // ----------------------------------------------------
+  // Usuario (SO): Cliente 1
+  // Fecha y hora: 28/03/23, 11:43:48
+  // ----------------------------------------------------
+  // Método: SVGcode
+  // Descripción:
+  // Corre desde el Macro SVGcode en la ventana del nuevo Método de Objeto
+  // En esa ventana se selecciona el nombre del nuevo Objeto de Formulario
+  // El nombre del nuevo Objeto de Lenguaje sale del mismo, concatenando "_obj"
+  // El código fuente está en SVGcode.txt, que se guarda en la carpeta Recursos
+  // ----------------------------------------------------
+
+
+C_LONGINT(<>vSVGmax;<>vSVGmin;<>vSVGuni;<>vSVGpas)  //Variables de configuración interproceso
+C_LONGINT($form_ancho;$form_alto;$numPags)
+C_BOOLEAN($largoFijo;$altFijo)
+C_TEXT($titulo)
+
+<>vSVGmax:=100
+<>vSVGmin:=0
+<>vSVGuni:=1
+<>vSVGpas:=1
+
+<>vSVGcolorFrontal:=""
+<>vSVGcolorFondo:=""
+
+  // Ventana dinamica de acuerdo al tamaño del Form
+FORM GET PROPERTIES("Termometro_ConfigurarGraduacion";$form_ancho;$form_alto;$numPags;$largoFijo;$altFijo;$titulo)
+
+Open window(100;80;100+$form_ancho;80+$form_alto;0;"Configurar Termometro";*)  //Abrimos una ventana para ingresar la configuración
+DIALOG("Termometro_ConfigurarGraduacion";)  // Aquí se introducen los valores de configuración, en las variables interproceso
+CLOSE WINDOW
+
+
+  // Determinacion del nombre del componente Variable
+C_TEXT($name;$SVGcode;$new_objName)
+C_COLLECTION($name_aux)
+$name_aux:=New collection
+$name_aux:=Split string($1;".")  //Tomo el nombre del metodo y separo por los '.'. Guardo en un collection
+$name:=$name_aux.pop()  // Extraigo el nombre del objeto
+
+  // Generacion  del nombre del objeto del componente Variable
+$new_objName:=$name+"_obj"  // Nombre del Objeto de Lenguaje
+
+  // El texto del método del Objeto de Formulario está en el documento Termometro_base.txt
+If (Is macOS)
+	$SVGcode:=Document to text(<>Access+"Recursos:Termometro_base.txt")
+Else   //Si estamos en Windows
+	$SVGcode:=Document to text(<>Access+"Recursos"+Char(92)+"Termometro_base.txt")
+End if 
+
+  // Pase del nombre "my_object" por $new_objName
+$SVGcode:=" // "+$name+Char(13)+Replace string($SVGcode;"my_object";$new_objName)
+  // Pase de valores del Termometro
+$SVGcode:=Replace string($SVGcode;"my_maximum";String(<>vSVGmax))
+$SVGcode:=Replace string($SVGcode;"my_minimum";String(<>vSVGmin))
+$SVGcode:=Replace string($SVGcode;"my_unity";String(<>vSVGuni))
+$SVGcode:=Replace string($SVGcode;"my_step";String(<>vSVGpas))
+$SVGcode:=Replace string($SVGcode;"my_colorfrontal";String(<>vSVGcolorFrontal))
+$SVGcode:=Replace string($SVGcode;"my_colorfondo";String(<>vSVGcolorFondo))
+
+  // Finalizado la actualización del texto, devolvemos al macro el nuevo texto modificado para insertarlo
+SET MACRO PARAMETER(Highlighted method text;$SVGcode)
+  // Eliminamos las variables interproceso
+CLEAR VARIABLE(<>vSVGmax)
+CLEAR VARIABLE(<>vSVGmin)
+CLEAR VARIABLE(<>vSVGuni)
+CLEAR VARIABLE(<>vSVGpas)
+CLEAR VARIABLE(<>vSVGcolorFrontal)
+CLEAR VARIABLE(<>vSVGcolorFondo)
