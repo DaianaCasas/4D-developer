@@ -1,0 +1,59 @@
+
+Case of 
+	: (Form event=On Load)
+		  //------------ Colores para SVG---------------
+		C_POINTER($lista_color)
+		ARRAY TEXT($color;20)
+		$lista_color:=->$color
+		SVG_GET_COLORS_ARRAY ($lista_color)
+		$cant_lista_color:=Size of array($color)
+		  // Para  probar
+		C_TEXT($lista_color_text)
+		$lista_color_text:=""
+		  // Para listar opciones
+		ARRAY TEXT(svgcolorfondo;$cant_lista_color)
+		ARRAY TEXT(svgcolorfrontal;$cant_lista_color)
+		
+		
+		For ($vlElem;0;$cant_lista_color)
+			  //$lista_color_text:=$lista_color_text+String($color{$vlElem})+"\n"
+			svgcolorfondo{$vlElem}:=$color{$vlElem}
+			svgcolorfrontal{$vlElem}:=$color{$vlElem}
+		End for 
+		
+		  //ALERT($lista_color_text)
+		
+		  //------------ Graduacion para SVG---------------
+		C_LONGINT(svgmax;svgmin;svguni;svgpas)
+		svgmax:=<>vSVGmax
+		svgmin:=<>vSVGmin
+		svguni:=<>vSVGuni
+		svgpas:=<>vSVGpas
+		
+	: (Form event=On Data Change)
+		
+		
+		
+	: (Form event=On Unload)
+		
+		<>vSVGmax:=svgmax
+		<>vSVGmin:=svgmin
+		<>vSVGuni:=svguni
+		<>vSVGpas:=svgpas
+		
+		
+		<>vSVGcolorFrontal:=svgcolorfrontal{svgcolorfrontal}  //el campo recibe un nuevo valor
+		<>vSVGcolorFondo:=svgcolorfondo{svgcolorfondo}  //el campo recibe un nuevo valor
+		  //ALERT("Colores Seleccionados son:\nFondo:"+ <>vSVGcolorFondo +"\nFrontal:"+<>vSVGcolorFrontal)
+		  //ALERT("Form config:  Las variables son: "+String(<>vSVGmax)+" "+String(<>vSVGmin)+" "+String(<>vSVGpas)+" "+String(<>vSVGuni)+" ")
+		
+		
+		CLEAR VARIABLE(svgcolorfrontal)
+		CLEAR VARIABLE(svgcolorfrontal)
+		CLEAR VARIABLE(svgmax)
+		CLEAR VARIABLE(svgmin)
+		CLEAR VARIABLE(svgpas)
+		CLEAR VARIABLE(svguni)
+		
+		
+End case 
