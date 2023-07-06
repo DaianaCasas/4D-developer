@@ -1,0 +1,73 @@
+  // $1: objeto de la imagen
+  // $2: valor a setear
+  // $3: tipo de actualizacion. "click" o "updpate" 
+
+
+
+C_OBJECT($1)  //Objeto
+C_LONGINT($2)  //valor
+C_TEXT($3)  // tipo de valor
+
+$PosX:=($1).imagenProp.PosX
+$cPosInf:=($1).imagenProp.PosInf
+$cPosSup:=($1).imagenProp.PosSup
+$PosAlto:=$cPosInf-$cPosSup
+
+$cant_bloques:=($1).imagen.cant_bloques
+$bloque:=0
+$base:=($1).imagen.minimo  // valor de inicio del termometro
+$maximo:=($1).imagen.maximo  // valor de inicio del termometro
+$paso:=($1).imagen.paso
+
+ARRAY INTEGER($aux;$cant_bloques)
+OB GET ARRAY($1;"bloques";$aux)
+
+$lim_max:=$aux{0}  // valor 1er bloque
+
+($1).valor:=$2  // almaceno el valor
+$valor:=$2
+
+If ($3#"click")  // si es por un seteo (programacion)
+	
+	$var_cant_bloque:=0  // bloque correspondiente al valor seteado
+	$valor_bloque:=0  // nivel del bloque correspondiente
+	C_TEXT($aux_bloques)
+	$aux_bloques:=""
+	If (($2)<=$base)  // Si es menor al minimo -> es 0
+		$var_cant_bloque:=0
+	Else 
+		If (($2)>=$maximo)  // Si es mayor al maximo 
+			$var_cant_bloque:=$cant_bloques
+		Else   // si esta dentro del rango
+			  //For ($i;1;$cant_bloques;)  // busco en que bloque pertenece
+			For ($i;1;Size of array($aux))  // busco en que bloque pertenece
+				If (($2)>$lim_max)  // Si es mayor al maximo 'i'
+					$lim_max:=$aux{$i}  // paso al prox maximo
+				Else   // Si es menor al maximo 'i'
+					$var_cant_bloque:=$i  // Seleciono ese bloque
+					$valor_bloque:=$aux{$i}  // Tomo el valor de ese bloque
+					$i:=$cant_bloques  // Fin de Bucle
+				End if 
+				$aux_bloques:=String($aux{$i})+"\n"+$aux_bloques  // Para ver la lista de bloques
+			End for 
+		End if 
+	End if 
+	  // Paso el bloque seleccionado a los pixeles correspondientes
+	$alto:=($1).imagen.maximo-$base  //Alto
+	$PosPaso:=(($1).imagen.paso*$PosAlto)/$alto
+	$bloque:=$PosPaso*$var_cant_bloque
+	$var_PosAlto:=$bloque
+	  //ALERT("--Valor : "+String($valor)+"\nMinimo: "+String($base)+"\nMaximo elegido: "+String($lim_max)+"\nPaso: "+String($paso)+"\nBloque seleccionado:\nnumero: "+String($var_cant_bloque)+"\nvalor: "+String($valor_bloque)+"\nBLOQUES: "+$aux_bloques+"\n\nPosPaso: "+String($PosPaso)+"\nPosBloque: "+String($bloque))
+	
+	
+	SVG_SET_XY (($1).imagenSVG.varrect;$PosX;$PosAlto-$var_PosAlto)  // Seteo del 0,0 de la barra var en el nivel de porcentaje
+	SVG_SET_DIMENSIONS (($1).imagenSVG.varrect;100;100;"%")  // Relleno y modifico el largo de la barra var
+	SVG EXPORT TO PICTURE(($1).imagenSVG.id;(($1).imagenProp.ptr)->;Get XML data source)  // objeto;variable del form; tipo de almacenamiento
+Else   // Si es por un click 
+	$var_PosAlto:=Num($2)  // Nivel a graficar en pixels
+	
+	SVG_SET_XY (($1).imagenSVG.varrect;$PosX;$var_PosAlto)  // Seteo del 0,0 de la barra var en el nivel de porcentaje
+	SVG_SET_DIMENSIONS (($1).imagenSVG.varrect;100;100;"%")  // Relleno y modifico el largo de la barra var
+	SVG EXPORT TO PICTURE(($1).imagenSVG.id;(($1).imagenProp.ptr)->;Get XML data source)
+End if 
+
