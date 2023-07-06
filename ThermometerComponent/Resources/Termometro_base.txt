@@ -1,0 +1,98 @@
+  // El nombre de variable debe ser IGUAL al nombre del Objeto de Formulario
+  // Objeto de Lenguaje: my_object
+  // MODIFICAR valores -------------------------------------------
+If (Form event=On Load)
+  $unidad:=my_unity
+  $maximo:=my_maximum
+  $minimo:=my_minimum
+  $paso:=my_step
+  $Color:="my_colorfondo"
+  $var_Color:="my_colorfrontal"
+
+  // NO MODIFICAR ----------------------------------------------
+  // Objeto de Formulario: Variable tipo IMAGEN
+  C_POINTER($vpref)
+  C_TEXT($name)
+  $name:=OBJECT Get name(Object current)  //Nombre de este objeto de formulario
+  $AnchoLinea:=0
+  $vpref:=OBJECT Get pointer(Object named;$name)  //Puntero a este objeto de formulario
+  // Tamanio de imagen
+  C_LONGINT($cPosIzq;$cPosSup;$cPosDer;$cPosInf)
+  OBJECT GET COORDINATES($vpref->;$cPosIzq;$cPosSup;$cPosDer;$cPosInf)  //Coordenadas de este objeto
+  $PosX:=0
+  $PosY:=0
+  $PosAncho:=$cPosDer-$cPosIzq
+  $PosAlto:=$cPosInf-$cPosSup
+  $var_PosX:=$PosX
+  $var_PosY:=$PosY
+  $var_PosAncho:=$PosAncho
+  // SVG
+  $idvImgSVG:=SVG_New ($PosAncho;$PosAlto)  //Nuevo documento SVG
+  // Rectangulos: Creo una barra de fondo y una var llena
+  $id_ImgSVG_Rect:=SVG_New_rect ($idvImgSVG;$PosX;$PosY;$PosAncho;$PosAlto;0;0;$Color;$Color;$AnchoLinea)
+  $var_PosAlto:=$PosAlto
+  $id_var_ImgSVG_Rect:=SVG_New_rect ($idvImgSVG;$var_PosX;$var_PosY;$var_PosAncho;$var_PosAlto;0;0;$var_Color;$var_Color;$AnchoLinea)
+  my_object:=New object()  //Crea un objeto de lenguage vacio
+  // SVG
+  my_object.imagenSVG:=New object()
+  my_object.imagenSVG.id:=$idvImgSVG
+  my_object.imagenSVG.rect:=$id_ImgSVG_Rect
+  my_object.imagenSVG.varrect:=$id_var_ImgSVG_Rect
+  // Imagen usuario
+  my_object.imagen:=New object()
+  my_object.imagen.minimo:=$minimo
+  my_object.imagen.maximo:=$maximo
+  my_object.imagen.paso:=$paso
+  my_object.imagen.unidad:=$unidad
+  my_object.imagen.color:=$Color
+  my_object.imagen.varcolor:=$var_Color
+  my_object.imagen.linea:=$AnchoLinea
+  C_TEXT($aux_bloques)
+  $aux_bloques:=""
+  $alto:=$maximo - $minimo
+  $cant_bloques:=$alto/$paso
+  ARRAY INTEGER($aux;$cant_bloques)
+  $aux{0}:=$minimo
+  If (True)
+		For ($i;1;$cant_bloques)
+		$aux{$i}:=$aux{$i-1}+$paso
+		$aux_bloques:=$aux_bloques+String($aux{$i}) +"\n" // Para ver la lista de bloques
+
+	End for 
+	my_object.imagen.cant_bloques:=$cant_bloques
+	OB SET ARRAY(my_object;"bloques";$aux)
+	//ALERT("Bloques : "+String($aux_bloques))
+  End if 
+
+  // Variable
+  my_object.valor:=0
+  // Definido por usuario
+  my_object.imagenProp:=New object()
+  my_object.imagenProp.ptr:=OBJECT Get pointer(Object named;$name)
+  my_object.imagenProp.PosIzq:=$cPosIzq
+  my_object.imagenProp.PosSup:=$cPosSup
+  my_object.imagenProp.PosDer:=$cPosDer
+  my_object.imagenProp.PosInf:=$cPosInf
+  my_object.imagenProp.Ancho:=$cPosDer-$cPosIzq
+  my_object.imagenProp.Alto:=$cPosInf-$cPosSup
+  my_object.imagenProp.PosX:=0
+  my_object.imagenProp.PosY:=0
+  my_object.imagenProp.varPosX:=$PosX
+  my_object.imagenProp.varPosY:=$PosY
+  my_object.imagenProp.varPosAncho:=$PosAncho
+  CLEAR VARIABLE($vpref)
+
+End if
+Case of 
+	: (Form event=On Load)
+		Termometro_UpdateValue (my_object;0;"update")
+	: ((Form event=On Clicked) | (Form event=On Double Clicked) | (Form event=On Drag Over))
+		If ((MouseX#-1) & (MouseY#-1))
+			Termometro_UpdateValue (my_object;MouseY;"click")
+		End if 
+	: (Form event=On Unload)
+		SVG_CLEAR(my_object.imagenSVG.id)
+		CLEAR VARIABLE(my_object)
+	Else 
+
+End case 
